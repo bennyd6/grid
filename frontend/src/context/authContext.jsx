@@ -38,7 +38,7 @@ export const AuthProvider = ({ children }) => {
             console.log("AuthContext: User is authenticated, but no portfolio found (404). Keeping token, setting user to null.");
             // This is the key change: Don't clear the token if portfolio is not found.
             // User is authenticated, just needs to create a portfolio.
-            setUser(null);
+            // setUser(null);
           }
           // else {
           //   // If fetching portfolio fails for reasons other than 404 (e.g., 401 Unauthorized, 500 Internal Server Error)
