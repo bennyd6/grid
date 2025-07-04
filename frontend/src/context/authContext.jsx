@@ -40,15 +40,15 @@ export const AuthProvider = ({ children }) => {
             // User is authenticated, just needs to create a portfolio.
             setUser(null);
           }
-          else {
-            // If fetching portfolio fails for reasons other than 404 (e.g., 401 Unauthorized, 500 Internal Server Error)
-            let errorDetails = await res.text(); // Read as text to avoid JSON parsing errors for non-JSON responses
-            console.error(`AuthContext: Failed to fetch user portfolio. Status: ${res.status}. Response: ${errorDetails}`);
-            console.warn("AuthContext: Invalid token or severe backend issue. Clearing token.");
-            localStorage.removeItem("token"); // Clear invalid/expired token
-            setAuthToken(null); // This will re-trigger useEffect with null authToken
-            setUser(null);
-          }
+          // else {
+          //   // If fetching portfolio fails for reasons other than 404 (e.g., 401 Unauthorized, 500 Internal Server Error)
+          //   let errorDetails = await res.text(); // Read as text to avoid JSON parsing errors for non-JSON responses
+          //   console.error(`AuthContext: Failed to fetch user portfolio. Status: ${res.status}. Response: ${errorDetails}`);
+          //   console.warn("AuthContext: Invalid token or severe backend issue. Clearing token.");
+          //   localStorage.removeItem("token"); // Clear invalid/expired token
+          //   setAuthToken(null); // This will re-trigger useEffect with null authToken
+          //   setUser(null);
+          // }
         } catch (error) {
           console.error("AuthContext: Error during user portfolio fetch:", error);
           console.warn("AuthContext: Network error or unexpected response. Clearing token.");
@@ -84,7 +84,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ authToken, user, login, logout, isAuthenticated: !!user, loading }}>
+    <AuthContext.Provider value={{ authToken, user, login, logout, isAuthenticated: !!authToken, loading }}> {/* Changed isAuthenticated to !!authToken */}
       {/* Children are rendered only when auth loading is complete */}
       {!loading && children}
       {loading && (
