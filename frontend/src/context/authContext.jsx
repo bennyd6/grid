@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
       if (authToken) {
         try {
           // Fetch user's portfolio to get their userId (uid)
-          const res = await fetch("http://localhost:3000/api/auth/myportfolio", {
+          const res = await fetch("https://grid-15d6.onrender.com/api/auth/myportfolio", {
             headers: { "auth-token": authToken },
           });
 

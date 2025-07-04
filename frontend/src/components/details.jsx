@@ -41,7 +41,7 @@ const Details = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:3000/api/auth/myportfolio', {
+      const response = await fetch('https://grid-15d6.onrender.com/api/auth/myportfolio', {
         headers: { 'auth-token': token },
       });
 
@@ -198,7 +198,7 @@ const Details = () => {
 
       const cleanedForm = cleanData(form);
 
-      const response = await fetch('http://localhost:3000/api/auth/portfolio', {
+      const response = await fetch('https://grid-15d6.onrender.com/api/auth/portfolio', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -242,7 +242,7 @@ const Details = () => {
     formData.append('resume', selectedFile);
 
     try {
-      const res = await axios.post('http://localhost:3000/upload', formData);
+      const res = await axios.post('https://grid-15d6.onrender.com/upload', formData);
       const parsedData = res.data?.parsedData;
 
       if (parsedData) {

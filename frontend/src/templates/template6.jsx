@@ -32,7 +32,7 @@ const Template6 = ({ data: propPortfolio, userId }) => { // Added userId prop
         let headers = {};
 
         if (userId) { // If userId is provided (from public link)
-          apiUrl = `http://localhost:3000/api/auth/portfolio/${userId}`;
+          apiUrl = `https://grid-15d6.onrender.com/api/auth/portfolio/${userId}`;
           // No auth-token needed for public route
         } else { // If no userId (from TemplateDisplay preview or direct protected route)
           const token = localStorage.getItem('token');
@@ -41,7 +41,7 @@ const Template6 = ({ data: propPortfolio, userId }) => { // Added userId prop
             setLoading(false);
             return;
           }
-          apiUrl = 'http://localhost:3000/api/auth/myportfolio';
+          apiUrl = 'https://grid-15d6.onrender.com/api/auth/myportfolio';
           headers = { 'auth-token': token };
         }
 
