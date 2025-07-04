@@ -1,9 +1,10 @@
+require('dotenv').config();
 const axios = require('axios');
 
-const GEMINI_API_KEY = 'AIzaSyDfdyyRwBDSMcCA9NlA6XCqtFH4r3Sy92w';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 module.exports = async function parseWithGemini(resumeText) {
-const prompt = `
+  const prompt = `
 You are an expert resume parser. From the following resume text, extract the following fields and return them in strict minified JSON format compatible with the following schema:
 
 {
@@ -47,7 +48,6 @@ Do NOT include any explanation, markdown, or extra formatting — just return th
 Resume Text:
 """${resumeText}"""
 `;
-
 
   try {
     const response = await axios.post(

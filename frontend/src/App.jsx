@@ -11,7 +11,7 @@ import Template5 from "./templates/template5";
 import Template6 from "./templates/template6";
 import TemplateDisplay from "./components/templateDisplay";
 import { AuthProvider } from "./context/authContext";
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoute from "./components/protectedRoute";
 import AuthenticatedLayout from "./components/authenticatedLayout"; // Corrected casing for consistency
 import PublicTemplateWrapper from "./components/publicTemplateWrapper"; // Import the new wrapper
 
