@@ -30,16 +30,21 @@ export const AuthProvider = ({ children }) => {
               setUser({ uid: portfolioData.userId });
               console.log("AuthContext: User portfolio fetched successfully. User UID:", portfolioData.userId);
             } else {
-              console.warn("AuthContext: Portfolio data fetched but no userId found or invalid structure. Clearing token.");
-              localStorage.removeItem("token");
-              setAuthToken(null); // This will re-trigger useEffect with null authToken
+              console.warn("AuthContext: Portfolio data fetched but no userId found or invalid structure. Clearing user, keeping token.");
+              // Keep token, but user is not fully set if portfolio data is incomplete
               setUser(null);
             }
-          } else {
-            // If fetching portfolio fails (e.g., 401 Unauthorized, 500 Internal Server Error)
+          } else if (res.status === 404) {
+            console.log("AuthContext: User is authenticated, but no portfolio found (404). Keeping token, setting user to null.");
+            // This is the key change: Don't clear the token if portfolio is not found.
+            // User is authenticated, just needs to create a portfolio.
+            setUser(null);
+          }
+          else {
+            // If fetching portfolio fails for reasons other than 404 (e.g., 401 Unauthorized, 500 Internal Server Error)
             let errorDetails = await res.text(); // Read as text to avoid JSON parsing errors for non-JSON responses
             console.error(`AuthContext: Failed to fetch user portfolio. Status: ${res.status}. Response: ${errorDetails}`);
-            console.warn("AuthContext: Invalid token or backend issue. Clearing token.");
+            console.warn("AuthContext: Invalid token or severe backend issue. Clearing token.");
             localStorage.removeItem("token"); // Clear invalid/expired token
             setAuthToken(null); // This will re-trigger useEffect with null authToken
             setUser(null);
