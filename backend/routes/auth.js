@@ -74,7 +74,7 @@ const router = require('express').Router(); // Initialize router here
 
 // Route 1: Create a new user - POST /api/auth/createuser
 router.post('/createuser', [
-    body('name', 'Enter a valid name').isLength({ min: 5 }),
+    body('name', 'Enter a valid name').isLength({ min: 1 }),
     body('email', 'Enter a valid email').isEmail(),
     body('password', 'Password must contain at least 5 characters').isLength({ min: 5 }),
 ], async (req, res) => {
