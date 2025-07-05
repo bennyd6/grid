@@ -40,6 +40,7 @@ const Signup = () => {
         // Redirect after a short delay, allowing the success message to be seen
         setTimeout(() => {
           navigate("/");
+          window.location.reload();
           // setIsLoading(false); // No need to set false here as component will unmount
         }, 1500);
       } else {

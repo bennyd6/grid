@@ -99,7 +99,7 @@ const TemplateDisplay = () => {
     // If portfolio is missing or has no userId, user becomes `null`.
     // So, if `user` is NOT null here, it implies `portfolioData.userId` was found.
     if (!user || !user.uid) { // This means `user` was `null` from AuthContext, implying no portfolio details or userId in portfolio data
-        setAuthModalMessage("To host a template, you need to complete your profile details first. Please go to 'Edit Your Details' to set up your portfolio.");
+        setAuthModalMessage("Try refreshing the page to set up your portfolio.");
         setShowAuthRequiredModal(true);
         return;
     }
@@ -278,14 +278,14 @@ const TemplateDisplay = () => {
               Okay
             </button>
             {/* Show "Go to Details" only if token exists but no portfolio data */}
-            {authToken && !user && ( // `user` being null here implies no portfolio data (or userId from portfolio data)
+            {/* {authToken && !user && ( // `user` being null here implies no portfolio data (or userId from portfolio data)
                 <button
                     onClick={() => { closeAuthRequiredModal(); navigate('/details'); }}
                     className="ml-4 px-6 py-2 bg-yellow-600 text-white rounded-full hover:bg-yellow-700 transition-colors duration-200 font-semibold shadow-md"
                 >
                     Go to Details
                 </button>
-            )}
+            )} */}
           </div>
         </div>
       )}
