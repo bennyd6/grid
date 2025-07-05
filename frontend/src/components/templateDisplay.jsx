@@ -10,13 +10,14 @@ import { useAuth } from '../context/authContext';
 
 const TemplateDisplay = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading } = useAuth(); // Destructure user, authLoading
 
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copySuccess, setCopySuccess] = useState('');
   // New state for the custom auth required modal
   const [showAuthRequiredModal, setShowAuthRequiredModal] = useState(false);
+  const [authModalMessage, setAuthModalMessage] = useState(""); // New state for specific auth modal message
 
   const templates = [
     { id: 1, name: 'Modern & Clean', component: Template1, buttonColor: 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-300' },
@@ -30,20 +31,30 @@ const TemplateDisplay = () => {
   const handleHostTemplate = async (templateId) => {
     console.log('handleHostTemplate called.');
     console.log('authLoading:', authLoading);
-    console.log('user:', user);
-    console.log('user.uid:', user ? user.uid : 'N/A');
+    console.log('user:', user); // Now user should have the actual UID
 
     if (authLoading) {
-      // If authentication state is still loading, inform the user to wait
-      setShowAuthRequiredModal(true); // Show custom modal
+      setAuthModalMessage("Verifying your login status. Please wait a moment...");
+      setShowAuthRequiredModal(true);
       return;
     }
-    if (!user || !user.uid) {
-      // If authentication is complete but no user or uid, then the user is not logged in
-      setShowAuthRequiredModal(true); // Show custom modal
+    // Check if user is not authenticated AT ALL (user is null or user.uid is null/undefined)
+    if (!user || !user.uid) { // user.uid should now be the actual ID
+      setAuthModalMessage("You must be logged in to host your portfolio. Please log in or create an account.");
+      setShowAuthRequiredModal(true);
       return;
     }
 
+    // Now, user IS authenticated (user is not null and user.uid is present). Check if they have a portfolio.
+    // The `hasPortfolio` flag comes from AuthContext.js
+    if (!user.hasPortfolio) {
+      setAuthModalMessage("To host a template, you need to complete your profile details first. Please go to 'Edit Your Details' to set up your portfolio.");
+      setShowAuthRequiredModal(true);
+      return;
+    }
+
+    // If we reach here, user is authenticated AND has a portfolio
+    // Use the actual user.uid for the public URL
     const publicUrl = `${window.location.origin}/public-template/${templateId}/${user.uid}`;
     setShareUrl(publicUrl);
     setShowShareModal(true);
@@ -63,11 +74,9 @@ const TemplateDisplay = () => {
     setCopySuccess('');
   };
 
-  // Function to close the custom auth required modal and reload if needed
   const closeAuthRequiredModal = () => {
     setShowAuthRequiredModal(false);
-    // You might want to conditionally reload only if user is still not logged in after closing
-    // For simplicity, we'll just close it. The next attempt to host will re-trigger the check.
+    setAuthModalMessage(""); // Clear message on close
   };
 
   return (
@@ -199,11 +208,17 @@ const TemplateDisplay = () => {
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 rounded-lg p-8 w-full max-w-md text-gray-100 shadow-2xl border border-gray-700 text-center">
             <h2 className="text-2xl font-bold mb-4 text-red-400">
-              Authentication Required
+              Action Required!
             </h2>
             <p className="mb-6 text-gray-300">
-              You must be logged in to host your portfolio.
-              {authLoading ? " Please wait while we verify your login status." : " Please log in or create an account."}
+              {/* Dynamic message based on auth state and portfolio status */}
+              {authLoading ?
+                "Verifying your login status. Please wait a moment..." :
+                (!user || !user.uid ?
+                  "You must be logged in to host your portfolio. Please log in or create an account." :
+                  "To host a template, you need to complete your profile details first. Please go to 'Edit Your Details' to set up your portfolio."
+                )
+              }
             </p>
             <button
               onClick={closeAuthRequiredModal}
@@ -211,6 +226,15 @@ const TemplateDisplay = () => {
             >
               Okay
             </button>
+            {/* Optional: Add a button to navigate to details if it's a "no portfolio" message */}
+            {user && !user.hasPortfolio && (
+                <button
+                    onClick={() => { closeAuthRequiredModal(); navigate('/details'); }}
+                    className="ml-4 px-6 py-2 bg-yellow-600 text-white rounded-full hover:bg-yellow-700 transition-colors duration-200 font-semibold shadow-md"
+                >
+                    Go to Details
+                </button>
+            )}
           </div>
         </div>
       )}

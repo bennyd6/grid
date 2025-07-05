@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode"; // Import jwtDecode
 
 const AuthContext = createContext(null);
 
@@ -22,6 +23,31 @@ export const AuthProvider = ({ children }) => {
       // console.log("AuthContext: authToken present. Attempting to verify and fetch user portfolio...");
       setLoading(true); // Always set loading true when starting verification
 
+      let decodedUid = null;
+      try {
+        const decoded = jwtDecode(authToken);
+        // Assuming your JWT has a 'userId' or 'id' claim for the user ID
+        // Adjust 'userId' if your token uses a different claim name (e.g., 'id', 'sub')
+        decodedUid = decoded.userId || decoded.id || decoded.sub;
+        if (!decodedUid) {
+          console.error("AuthContext: Decoded token does not contain a userId/id/sub claim.");
+          // If token doesn't contain UID, treat as invalid for this purpose
+          localStorage.removeItem("token");
+          setAuthToken(null);
+          setUser(null);
+          setLoading(false);
+          return;
+        }
+        // console.log("AuthContext: Decoded UID from token:", decodedUid);
+      } catch (decodeError) {
+        console.error("AuthContext: Failed to decode JWT token:", decodeError);
+        localStorage.removeItem("token"); // Clear invalid token
+        setAuthToken(null);
+        setUser(null);
+        setLoading(false);
+        return;
+      }
+
       try {
         const API_BASE_URL = 'https://grid-15d6.onrender.com';
 
@@ -36,22 +62,21 @@ export const AuthProvider = ({ children }) => {
             // console.log("AuthContext: User portfolio fetched successfully. User UID:", portfolioData.userId);
           } else {
             // Token is valid (res.ok), but no specific portfolio data or userId was returned.
-            // User is authenticated, but might need to create their portfolio.
-            // Set user to indicate authenticated status without full portfolio data.
-            // console.warn("AuthContext: Token valid, but no userId in portfolio data. Setting user as authenticated, no portfolio.");
-            setUser({ uid: 'authenticated', hasPortfolio: false }); // 'authenticated' as a placeholder UID
+            // Use the UID obtained from decoding the token.
+            // console.warn("AuthContext: Token valid, but no userId in portfolio data. Setting user as authenticated with decoded UID, no portfolio.");
+            setUser({ uid: decodedUid, hasPortfolio: false });
           }
         } else if (res.status === 404) {
           // Token is valid, but no portfolio exists for the user.
-          // The user IS authenticated, they just haven't created a portfolio yet.
-          // console.log("AuthContext: User is authenticated, but no portfolio found (404). Setting user as authenticated, no portfolio.");
-          setUser({ uid: 'authenticated', hasPortfolio: false }); // 'authenticated' as a placeholder UID
+          // Use the UID obtained from decoding the token.
+          // console.log("AuthContext: User is authenticated, but no portfolio found (404). Setting user with decoded UID, no portfolio.");
+          setUser({ uid: decodedUid, hasPortfolio: false });
         } else {
           // Token is invalid, expired, or other server error (e.g., 401 Unauthorized, 403 Forbidden, 500 Internal)
           // console.error(`AuthContext: Failed to verify token. Status: ${res.status}`);
           localStorage.removeItem("token"); // Clear invalid/expired token
-          setAuthToken(null); // This will re-trigger useEffect with null authToken
-          setUser(null); // Clear user state
+          setAuthToken(null);
+          setUser(null);
         }
       } catch (error) {
         // Network error, JSON parsing error, etc.
@@ -60,7 +85,7 @@ export const AuthProvider = ({ children }) => {
         setAuthToken(null);
         setUser(null);
       } finally {
-        setLoading(false); // Authentication check is complete (whether success or failure)
+        setLoading(false); // Authentication check is complete
         // console.log("AuthContext: verifyAuthToken finished. Loading set to false.");
       }
     };
@@ -72,26 +97,30 @@ export const AuthProvider = ({ children }) => {
     // console.log("AuthContext: login function called. Setting token.");
     localStorage.setItem("token", token);
     setAuthToken(token); // Update authToken state, triggering the useEffect above for verification
-    // Immediately set a placeholder user state for quicker UI updates, it will be refined by useEffect
-    setUser({ uid: 'authenticated', hasPortfolio: false });
+
+    // Immediately set a placeholder user state with the decoded UID for quicker UI updates
+    // This ensures components like TemplateDisplay have the correct UID right away.
+    let tempUid = null;
+    try {
+      const decoded = jwtDecode(token);
+      tempUid = decoded.userId || decoded.id || decoded.sub;
+    } catch (e) {
+      console.error("AuthContext: Failed to decode token on login:", e);
+    }
+    setUser({ uid: tempUid, hasPortfolio: false }); // hasPortfolio will be updated by useEffect
   };
 
   const logout = () => {
     // console.log("AuthContext: logout function called. Clearing token and user.");
     localStorage.removeItem("token");
-    setAuthToken(null); // Update authToken state, triggering useEffect
+    setAuthToken(null);
     setUser(null); // Clear user state immediately
   };
 
-  // Provide authToken, user, login, logout, isAuthenticated (derived), and loading state
   const value = { authToken, user, login, logout, isAuthenticated: !!authToken, loading };
 
   return (
     <AuthContext.Provider value={value}>
-      {/* IMPORTANT: Do NOT conditionally render children here based on `loading`.
-          The `children` (your App's routes) should always be rendered.
-          The `PrivateRoute` component in App.js is responsible for showing
-          a loading spinner or redirecting based on the `loading` and `user` states. */}
       {children}
     </AuthContext.Provider>
   );
