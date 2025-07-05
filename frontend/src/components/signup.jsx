@@ -1,31 +1,26 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Although not directly used for final redirect, good to keep
-import { useAuth } from "../context/authContext"; // Adjust path if necessary
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/authContext";
 import { motion, AnimatePresence } from "framer-motion";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth(); // Function to save token in context/localStorage
-  const navigate = useNavigate(); // Keep if you use it for other navigations
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  // State for custom modal messages
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState("success"); // 'success' or 'error'
+  const [modalType, setModalType] = useState("success");
 
-  // State for loading indicator during form submission
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true); // Start loading when form is submitted
+    setIsLoading(true);
 
     try {
-      // Use the deployed backend URL for signup
-      // It's good practice to use an environment variable for this
-      // For example: process.env.REACT_APP_API_BASE_URL
       const API_BASE_URL = 'https://grid-15d6.onrender.com';
 
       const response = await fetch(`${API_BASE_URL}/api/auth/createuser`, {
@@ -39,56 +34,50 @@ const Signup = () => {
       const json = await response.json();
 
       if (response.ok && json.authtoken) {
-        login(json.authtoken); // Save the token to localStorage and update auth context state
+        login(json.authtoken);
         setModalMessage("Signup successful! Redirecting to your dashboard...");
         setModalType("success");
-        setShowModal(true); // Show success modal
+        setShowModal(true);
 
-        // Perform a full page reload after a short delay
-        // This is crucial to ensure the AuthProvider re-initializes and picks up the new token
-        // leading the user to the correct authenticated route (e.g., your home page "/")
         setTimeout(() => {
-          window.location.reload(); // Hard reload to fully reset authentication state
-        }, 1500); // Give user 1.5 seconds to see the success message before reload
+          window.location.reload(); // Perform a hard reload to ensure context re-initializes
+        }, 1500);
 
       } else {
-        // Handle signup failure (e.g., email already exists, validation errors from backend)
-        setIsLoading(false); // Stop loading on error
+        setIsLoading(false);
         setModalMessage(json.error || "Signup failed. Please try again.");
         setModalType("error");
-        setShowModal(true); // Show error modal
+        setShowModal(true);
       }
     } catch (error) {
-      // Handle network errors or other unexpected issues
       console.error("Signup error:", error);
-      setIsLoading(false); // Stop loading on error
+      setIsLoading(false);
       setModalMessage("Something went wrong. Please check your network connection or try again.");
       setModalType("error");
-      setShowModal(true); // Show error modal
+      setShowModal(true);
     }
   };
 
-  // Function to close the custom modal
   const closeModal = () => {
     setShowModal(false);
     setModalMessage("");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4">
-      <div className="bg-gray-800 rounded-lg shadow-2xl p-8 w-full max-w-md border border-gray-700">
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-400">Create Your Account</h2>
+    <div className="min-h-screen flex items-center justify-center bg-black text-white p-4"> {/* bg-black for dominant theme */}
+      <div className="bg-gray-900 rounded-lg shadow-2xl p-8 w-full max-w-md border border-gray-700"> {/* Darker background for form */}
+        <h2 className="text-3xl font-bold mb-6 text-center text-blue-500">Create Your Account</h2> {/* Blue accent */}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label htmlFor="name" className="block mb-1 font-medium text-gray-300">Your Name</label>
             <input
               type="text"
               id="name"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500" 
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isLoading} // Disable input during loading
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -96,11 +85,11 @@ const Signup = () => {
             <input
               type="email"
               id="email"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              disabled={isLoading} // Disable input during loading
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -108,19 +97,19 @@ const Signup = () => {
             <input
               type="password"
               id="password"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6} // Client-side validation, match backend if applicable
-              disabled={isLoading} // Disable input during loading
+              minLength={6}
+              disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-2.5 rounded-md hover:bg-blue-700 transition duration-300 ease-in-out relative font-semibold shadow-md
+            className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition duration-300 ease-in-out relative font-semibold shadow-md
                        flex items-center justify-center"
-            disabled={isLoading} // Disable button during loading
+            disabled={isLoading}
           >
             {isLoading ? (
               <span className="flex items-center">
@@ -153,13 +142,13 @@ const Signup = () => {
         </form>
         <p className="mt-6 text-center text-sm text-gray-400">
           Already have an account?{" "}
-          <a href="/login" className="text-blue-400 hover:text-blue-300 font-medium transition duration-200">
+          <a href="/login" className="text-blue-500 hover:text-blue-400 font-medium transition duration-200"> {/* Blue link */}
             Login here
           </a>
         </p>
       </div>
 
-      {/* Custom Modal for success/error messages */}
+      {/* Custom Modal for success/error messages - unchanged as they are already themed well */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -182,7 +171,7 @@ const Signup = () => {
                 {modalType === "success" ? "Success!" : "Error!"}
               </h3>
               <p className="text-center mb-6">{modalMessage}</p>
-              {modalType === "error" && ( // Only show "OK" button for error messages
+              {modalType === "error" && (
                 <div className="flex justify-center">
                   <button
                     onClick={closeModal}
