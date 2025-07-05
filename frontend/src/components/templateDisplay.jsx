@@ -1,87 +1,20 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState } from 'react'; // Import useState
 import { useNavigate } from 'react-router-dom';
-
-// Mock Template Components - These are placeholders to resolve import errors.
-// In a real application, these would be in their respective files.
-const Template1 = () => <div className="p-4 text-center text-gray-700">Template 1 Content</div>;
-const Template2 = () => <div className="p-4 text-center text-gray-700">Template 2 Content</div>;
-const Template3 = () => <div className="p-4 text-center text-gray-700">Template 3 Content</div>;
-const Template4 = () => <div className="p-4 text-center text-gray-700">Template 4 Content</div>;
-const Template5 = () => <div className="p-4 text-center text-gray-700">Template 5 Content</div>;
-const Template6 = () => <div className="p-4 text-center text-gray-700">Template 6 Content</div>;
-
-// Mock Auth Context and Hook
-const AuthContext = createContext(null);
-
-const useAuth = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(false); // Initially not loading, user is logged out
-
-  // Simulate login
-  const login = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setUser({ uid: 'mock-user-id-123' });
-      setLoading(false);
-    }, 1000); // Simulate 1 second login time
-  };
-
-  // Simulate logout
-  const logout = () => {
-    setLoading(true);
-    setTimeout(() => {
-      setUser(null);
-      setLoading(false);
-    }, 500); // Simulate 0.5 second logout time
-  };
-
-  return { user, loading, login, logout };
-};
-
-// AuthProvider component (optional, but good practice if useAuth is more complex)
-const AuthProvider = ({ children }) => {
-    const auth = useAuth();
-    return (
-        <AuthContext.Provider value={auth}>
-            {children}
-        </AuthContext.Provider>
-    );
-};
-
-
-// Custom Message Modal Component
-const MessageModal = ({ show, title, message, onClose }) => {
-  if (!show) return null;
-
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-800 rounded-lg p-8 w-full max-w-sm text-gray-100 shadow-2xl border border-gray-700">
-        <h2 className="text-2xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400">
-          {title}
-        </h2>
-        <p className="mb-6 text-gray-300">{message}</p>
-        <div className="flex justify-end">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 bg-purple-600 text-white rounded-full hover:bg-purple-700 transition-colors duration-200 font-semibold shadow-md"
-          >
-            OK
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
+import Template1 from '../templates/template1';
+import Template2 from '../templates/template2';
+import Template3 from '../templates/template3';
+import Template4 from '../templates/template4';
+import Template5 from '../templates/template5';
+import Template6 from '../templates/template6';
+import { useAuth } from '../context/authContext'; // Import useAuth
 
 const TemplateDisplay = () => {
   const navigate = useNavigate();
-  const { user, loading: authLoading, login, logout } = useAuth(); // Destructure login/logout from useAuth
+  const { user, loading: authLoading } = useAuth(); // Get the current authenticated user and auth loading state
 
   const [showShareModal, setShowShareModal] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
   const [copySuccess, setCopySuccess] = useState('');
-  const [showMessageModal, setShowMessageModal] = useState(false); // State for custom message modal
-  const [messageModalContent, setMessageModalContent] = useState({ title: '', message: '' }); // Content for message modal
 
   // Array to map through for rendering templates
   const templates = [
@@ -94,45 +27,30 @@ const TemplateDisplay = () => {
   ];
 
   const handleHostTemplate = async (templateId) => {
-    // Debugging logs
+    // Debugging logs (keep for now, remove later if stable)
     console.log('handleHostTemplate called.');
     console.log('authLoading:', authLoading);
     console.log('user:', user);
     console.log('user.uid:', user ? user.uid : 'N/A');
 
     if (authLoading) {
-      setMessageModalContent({
-        title: "Authentication Status",
-        message: "Please wait while we verify your login status."
-      });
-      setShowMessageModal(true);
+      alert("Please wait while we verify your login status.");
       return;
     }
-
+    
+    // Check if user or user.uid is null after authLoading is false
     if (!user || !user.uid) {
-      setMessageModalContent({
-        title: "Login Required",
-        message: "You must be logged in to host your portfolio. Please log in."
-      });
-      setShowMessageModal(true);
+      alert("You must be logged in to host your portfolio. Reloading to verify login...");
+      window.location.reload(); // Reload the page to re-evaluate auth status
       return;
     }
 
     const publicUrl = `${window.location.origin}/public-template/${templateId}/${user.uid}`;
     setShareUrl(publicUrl);
-    setShowShareModal(true); // Show the custom share modal
+    setShowShareModal(true); // Show the custom modal
 
     try {
-      // Use document.execCommand('copy') for better compatibility in iframes
-      const textarea = document.createElement('textarea');
-      textarea.value = publicUrl;
-      textarea.style.position = 'fixed'; // Prevent scrolling to bottom of page in iOS.
-      textarea.style.opacity = '0'; // Hide the textarea
-      document.body.appendChild(textarea);
-      textarea.focus();
-      textarea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textarea);
+      await navigator.clipboard.writeText(publicUrl);
       setCopySuccess('Copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy URL:', err);
@@ -146,15 +64,7 @@ const TemplateDisplay = () => {
     setCopySuccess('');
   };
 
-  const closeMessageModal = () => {
-    setShowMessageModal(false);
-    setMessageModalContent({ title: '', message: '' });
-  };
-
   return (
-    // Wrap the main component with AuthProvider if you want to use context
-    // For this self-contained example, useAuth is directly in the file.
-    // If you had a separate App.js, you'd wrap the <TemplateDisplay> there.
     <div className="relative w-screen min-h-screen overflow-hidden">
       {/* Background Video */}
       <video
@@ -181,41 +91,17 @@ const TemplateDisplay = () => {
             <p className="text-xl text-gray-300 max-w-3xl mx-auto mb-8">
               Select a stunning portfolio template that best represents your unique style and professional journey.
             </p>
-            {/* Action Buttons */}
-            <div className="flex justify-center items-center gap-4 mt-8">
-                <button
-                    onClick={() => navigate('/details')}
-                    className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700 text-gray-100 font-semibold rounded-full shadow-lg
-                                hover:bg-gray-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM10 12.586L17.586 5 15 2.414 7.414 10 10 12.586zM15 17a1 1 0 100-2 1 1 0 000 2z" />
-                    </svg>
-                    <span>Edit Your Details</span>
-                </button>
-
-                {/* Login/Logout Button */}
-                {!user ? (
-                    <button
-                        onClick={login}
-                        disabled={authLoading}
-                        className="inline-flex items-center space-x-2 px-6 py-3 bg-green-600 text-white font-semibold rounded-full shadow-lg
-                                    hover:bg-green-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {authLoading ? 'Logging In...' : 'Login to Host'}
-                    </button>
-                ) : (
-                    <button
-                        onClick={logout}
-                        disabled={authLoading}
-                        className="inline-flex items-center space-x-2 px-6 py-3 bg-red-600 text-white font-semibold rounded-full shadow-lg
-                                    hover:bg-red-700 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-red-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {authLoading ? 'Logging Out...' : 'Logout'}
-                    </button>
-                )}
-            </div>
-            {user && <p className="mt-4 text-sm text-gray-400">Logged in as: {user.uid}</p>}
+            {/* Edit Details Button */}
+            <button
+              onClick={() => navigate('/details')}
+              className="inline-flex items-center space-x-2 px-6 py-3 bg-gray-700 text-gray-100 font-semibold rounded-full shadow-lg
+                         hover:bg-gray-600 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-gray-500"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM10 12.586L17.586 5 15 2.414 7.414 10 10 12.586zM15 17a1 1 0 100-2 1 1 0 000 2z" />
+              </svg>
+              <span>Edit Your Details</span>
+            </button>
           </div>
 
           {/* Templates Grid */}
@@ -279,18 +165,7 @@ const TemplateDisplay = () => {
                 className="w-full p-3 pr-10 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none"
               />
               <button
-                onClick={() => {
-                  const textarea = document.createElement('textarea');
-                  textarea.value = shareUrl;
-                  textarea.style.position = 'fixed';
-                  textarea.style.opacity = '0';
-                  document.body.appendChild(textarea);
-                  textarea.focus();
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                  setCopySuccess('Copied!');
-                }}
+                onClick={() => navigator.clipboard.writeText(shareUrl).then(() => setCopySuccess('Copied!'))}
                 className="absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-full bg-gray-600 hover:bg-gray-500 transition-colors"
                 title="Copy to clipboard"
               >
@@ -312,14 +187,6 @@ const TemplateDisplay = () => {
           </div>
         </div>
       )}
-
-      {/* Custom Message Modal */}
-      <MessageModal
-        show={showMessageModal}
-        title={messageModalContent.title}
-        message={messageModalContent.message}
-        onClose={closeMessageModal}
-      />
     </div>
   );
 };
