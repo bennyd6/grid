@@ -7,6 +7,7 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // New state for password visibility
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -66,50 +67,72 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white text-black">
-      <div className="bg-black text-white rounded-lg shadow-lg p-8 w-full max-w-md">
-        <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
-        <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white p-4"> {/* Changed background to a slightly softer dark */}
+      <div className="bg-black text-white rounded-lg shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 ease-in-out hover:scale-105"> {/* Enhanced shadow and hover effect */}
+        <h2 className="text-4xl font-extrabold mb-6 text-center text-white animate-fade-in-down"> {/* Larger, bolder title with animation */}
+          Join Us!
+        </h2>
+        <form onSubmit={handleSubmit} className="space-y-6"> {/* Increased spacing */}
           <div>
-            <label htmlFor="name" className="block mb-1 font-medium">Name</label>
+            <label htmlFor="name" className="block mb-2 font-semibold text-gray-300">Your Name</label> {/* Descriptive label */}
             <input
               type="text"
               id="name"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-3 focus:ring-white focus:border-transparent bg-gray-800 text-white placeholder-gray-400 transition duration-300 ease-in-out" // Improved focus styles and transition
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isLoading} 
+              placeholder="Enter your name"
+              disabled={isLoading}
             />
           </div>
           <div>
-            <label htmlFor="email" className="block mb-1 font-medium">Email</label>
+            <label htmlFor="email" className="block mb-2 font-semibold text-gray-300">Email Address</label> {/* Descriptive label */}
             <input
               type="email"
               id="email"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-3 focus:ring-white focus:border-transparent bg-gray-800 text-white placeholder-gray-400 transition duration-300 ease-in-out" // Improved focus styles and transition
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              placeholder="Enter your email"
               disabled={isLoading}
             />
           </div>
-          <div>
-            <label htmlFor="password" className="block mb-1 font-medium">Password</label>
+          <div className="relative"> {/* Added relative positioning for the show/hide button */}
+            <label htmlFor="password" className="block mb-2 font-semibold text-gray-300">Password</label>
             <input
-              type="password"
-              id="password"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
+              type={showPassword ? "text" : "password"}
+              className="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-3 focus:ring-white focus:border-transparent bg-gray-800 text-white placeholder-gray-400 transition duration-300 ease-in-out" // Improved focus styles and transition
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              placeholder="Create your password"
               disabled={isLoading}
             />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-8 text-gray-500 hover:text-white focus:outline-none transition duration-150 ease-in-out"
+              disabled={isLoading}
+            >
+              {showPassword ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M3.707 2.293a1 1 0 00-1.414 1.414L5.586 7H3a1 1 0 000 2h3.586l-2.293 2.293a1 1 0 101.414 1.414L8 10.414l2.293 2.293a1 1 0 001.414-1.414L9.414 9l2.293-2.293a1 1 0 00-1.414-1.414L8 7.586l-2.293-2.293a1 1 0 00-1.414 0zM14.707 5.293a1 1 0 00-1.414 1.414L15.586 9H13a1 1 0 000 2h2.586l-2.293 2.293a1 1 0 001.414 1.414L18 10.414l-2.293-2.293a1 1 0 00-1.414 0z" clipRule="evenodd" />
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                  <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                </svg>
+              )}
+            </button>
           </div>
           <button
             type="submit"
-            className="w-full bg-white text-black py-2 rounded-md hover:bg-gray-200 transition relative"
-            disabled={isLoading} 
+            className="cursor-pointer w-full bg-white text-black py-3 rounded-lg hover:bg-gray-200 transition duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 flex items-center justify-center relative" // Enhanced button with animations and flex for loader
+            disabled={isLoading}
           >
             {isLoading ? (
               <span className="flex items-center justify-center">
@@ -140,8 +163,8 @@ const Signup = () => {
             )}
           </button>
         </form>
-        <p className="mt-4 text-center text-sm">
-          Already have an account? <a href="/login" className="text-white font-medium">Login</a>
+        <p className="mt-6 text-center text-base text-gray-300">
+          Already have an account? <a href="/login" className="text-white font-semibold hover:underline transition duration-200">Login here</a> {/* Improved link styling */}
         </p>
       </div>
 
@@ -160,15 +183,15 @@ const Signup = () => {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
             >
-              <h3 className="text-xl font-bold mb-4 text-center">
+              <h3 className="text-2xl font-bold mb-4 text-center">
                 {modalType === 'success' ? 'Success!' : 'Error!'}
               </h3>
-              <p className="text-center mb-6">{modalMessage}</p>
+              <p className="text-center mb-6 text-lg">{modalMessage}</p> {/* Larger text for message */}
               {modalType === 'error' && ( // Only show "OK" button for error messages
                 <div className="flex justify-center">
                   <button
                     onClick={closeModal}
-                    className={`px-6 py-2 rounded-full font-semibold shadow-md transition-colors duration-200 ${modalType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
+                    className={`px-8 py-3 rounded-full font-bold shadow-lg transition-colors duration-200 ${modalType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
                   >
                     OK
                   </button>
