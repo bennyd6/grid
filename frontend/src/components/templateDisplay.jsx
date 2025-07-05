@@ -38,11 +38,11 @@ const TemplateDisplay = () => {
       alert("Please wait while we verify your login status."); // Using alert for immediate feedback during auth loading
       return;
     }
-    if (!user || !user.uid) {
-      // If authentication is complete but no user or uid, then the user is not logged in
-      alert("You must be logged in to host your portfolio. Please log in."); // Using alert for immediate feedback
-      return;
-    }
+    // if (!user || !user.uid) {
+    //   // If authentication is complete but no user or uid, then the user is not logged in
+    //   alert("You must be logged in to host your portfolio. Please log in."); // Using alert for immediate feedback
+    //   return;
+    // }
 
     const publicUrl = `${window.location.origin}/public-template/${templateId}/${user.uid}`;
     setShareUrl(publicUrl);
