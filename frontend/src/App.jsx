@@ -11,7 +11,7 @@ import Template5 from "./templates/template5";
 import Template6 from "./templates/template6";
 import TemplateDisplay from "./components/templateDisplay";
 import { AuthProvider } from "./context/authContext";
-import ProtectedRoute from "./components/protectedRoute"; // Correct import for ProtectedRoute
+import ProtectedRoute from "./components/protectedRoute";
 import AuthenticatedLayout from "./components/authenticatedLayout"; // Corrected casing for consistency
 import PublicTemplateWrapper from "./components/publicTemplateWrapper"; // Import the new wrapper
 
@@ -26,7 +26,7 @@ function App() {
           {/* New public route for hosted templates */}
           <Route path="/public-template/:id/:userId" element={<PublicTemplateWrapper />} />
 
-          {/* Protected Routes - All nested under AuthenticatedLayout, which is protected by ProtectedRoute */}
+          {/* Protected Routes - All nested under AuthenticatedLayout */}
           {/* The AuthenticatedLayout renders the Navbar, and then the specific child route content */}
           <Route element={<ProtectedRoute><AuthenticatedLayout /></ProtectedRoute>}>
             <Route path="/" element={<Home />} />
@@ -39,10 +39,6 @@ function App() {
             <Route path="/template/5" element={<Template5 />} />
             <Route path="/template/6" element={<Template6 />} />
           </Route>
-
-          {/* Fallback route for any unmatched paths.
-              This will redirect to the root, which is then handled by ProtectedRoute. */}
-          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Router>
     </AuthProvider>
