@@ -7,19 +7,21 @@ const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login } = useAuth(); // to save token in context/localStorage
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   // State for custom modal
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
   const [modalType, setModalType] = useState("success"); // 'success' or 'error'
+  // New state for loading indicator
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true); // Start loading
 
     try {
-      // Use the deployed backend URL
       const response = await fetch("https://grid-15d6.onrender.com/api/auth/createuser", {
         method: "POST",
         headers: {
@@ -35,17 +37,20 @@ const Signup = () => {
         setModalMessage("Signup successful! Redirecting to home...");
         setModalType("success");
         setShowModal(true);
-        // Redirect after a short delay to allow user to see the success message
+        // Redirect after a short delay, allowing the success message to be seen
         setTimeout(() => {
           navigate("/");
+          // setIsLoading(false); // No need to set false here as component will unmount
         }, 1500);
       } else {
+        setIsLoading(false); // Stop loading on error
         setModalMessage(json.error || "Signup failed. Please try again.");
         setModalType("error");
         setShowModal(true);
       }
     } catch (error) {
       console.error("Signup error:", error);
+      setIsLoading(false); // Stop loading on error
       setModalMessage("Something went wrong. Please check your network connection.");
       setModalType("error");
       setShowModal(true);
@@ -55,6 +60,8 @@ const Signup = () => {
   const closeModal = () => {
     setShowModal(false);
     setModalMessage("");
+    // If it was a success modal leading to redirect, prevent closing if redirect hasn't happened
+    // This is handled by the setTimeout already, but useful if you had different logic
   };
 
   return (
@@ -71,6 +78,7 @@ const Signup = () => {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              disabled={isLoading} 
             />
           </div>
           <div>
@@ -82,6 +90,7 @@ const Signup = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <div>
@@ -93,13 +102,41 @@ const Signup = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-white text-black py-2 rounded-md hover:bg-gray-200 transition"
+            className="w-full bg-white text-black py-2 rounded-md hover:bg-gray-200 transition relative"
+            disabled={isLoading} 
           >
-            Sign Up
+            {isLoading ? (
+              <span className="flex items-center justify-center">
+                <svg
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Signing Up...
+              </span>
+            ) : (
+              "Sign Up"
+            )}
           </button>
         </form>
         <p className="mt-4 text-center text-sm">
@@ -126,14 +163,16 @@ const Signup = () => {
                 {modalType === 'success' ? 'Success!' : 'Error!'}
               </h3>
               <p className="text-center mb-6">{modalMessage}</p>
-              <div className="flex justify-center">
-                <button
-                  onClick={closeModal}
-                  className={`px-6 py-2 rounded-full font-semibold shadow-md transition-colors duration-200 ${modalType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
-                >
-                  OK
-                </button>
-              </div>
+              {modalType === 'error' && ( // Only show "OK" button for error messages
+                <div className="flex justify-center">
+                  <button
+                    onClick={closeModal}
+                    className={`px-6 py-2 rounded-full font-semibold shadow-md transition-colors duration-200 ${modalType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
+                  >
+                    OK
+                  </button>
+                </div>
+              )}
             </motion.div>
           </motion.div>
         )}
