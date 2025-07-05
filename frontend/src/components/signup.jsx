@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/authContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion"; // Import motion and AnimatePresence
 
 const Signup = () => {
   const [name, setName] = useState("");
@@ -10,20 +10,19 @@ const Signup = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
+  // State for custom modal
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-  const [modalType, setModalType] = useState("success");
-
+  const [modalType, setModalType] = useState("success"); // 'success' or 'error'
+  // New state for loading indicator
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
+    setIsLoading(true); // Start loading
 
     try {
-      const API_BASE_URL = 'https://grid-15d6.onrender.com';
-
-      const response = await fetch(`${API_BASE_URL}/api/auth/createuser`, {
+      const response = await fetch("https://grid-15d6.onrender.com/api/auth/createuser", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -35,24 +34,24 @@ const Signup = () => {
 
       if (response.ok && json.authtoken) {
         login(json.authtoken);
-        setModalMessage("Signup successful! Redirecting to your dashboard...");
+        setModalMessage("Signup successful! Redirecting to home...");
         setModalType("success");
         setShowModal(true);
-
+        // Redirect after a short delay, allowing the success message to be seen
         setTimeout(() => {
-          window.location.reload(); // Perform a hard reload to ensure context re-initializes
+          navigate("/");
+          // setIsLoading(false); // No need to set false here as component will unmount
         }, 1500);
-
       } else {
-        setIsLoading(false);
+        setIsLoading(false); // Stop loading on error
         setModalMessage(json.error || "Signup failed. Please try again.");
         setModalType("error");
         setShowModal(true);
       }
     } catch (error) {
       console.error("Signup error:", error);
-      setIsLoading(false);
-      setModalMessage("Something went wrong. Please check your network connection or try again.");
+      setIsLoading(false); // Stop loading on error
+      setModalMessage("Something went wrong. Please check your network connection.");
       setModalType("error");
       setShowModal(true);
     }
@@ -61,31 +60,33 @@ const Signup = () => {
   const closeModal = () => {
     setShowModal(false);
     setModalMessage("");
+    // If it was a success modal leading to redirect, prevent closing if redirect hasn't happened
+    // This is handled by the setTimeout already, but useful if you had different logic
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black text-white p-4"> {/* bg-black for dominant theme */}
-      <div className="bg-gray-900 rounded-lg shadow-2xl p-8 w-full max-w-md border border-gray-700"> {/* Darker background for form */}
-        <h2 className="text-3xl font-bold mb-6 text-center text-blue-500">Create Your Account</h2> {/* Blue accent */}
-        <form onSubmit={handleSubmit} className="space-y-5">
+    <div className="min-h-screen flex items-center justify-center bg-white text-black">
+      <div className="bg-black text-white rounded-lg shadow-lg p-8 w-full max-w-md">
+        <h2 className="text-3xl font-bold mb-6 text-center">Sign Up</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label htmlFor="name" className="block mb-1 font-medium text-gray-300">Your Name</label>
+            <label htmlFor="name" className="block mb-1 font-medium">Name</label>
             <input
               type="text"
               id="name"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500" 
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              disabled={isLoading}
+              disabled={isLoading} 
             />
           </div>
           <div>
-            <label htmlFor="email" className="block mb-1 font-medium text-gray-300">Email Address</label>
+            <label htmlFor="email" className="block mb-1 font-medium">Email</label>
             <input
               type="email"
               id="email"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -93,28 +94,26 @@ const Signup = () => {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block mb-1 font-medium text-gray-300">Password</label>
+            <label htmlFor="password" className="block mb-1 font-medium">Password</label>
             <input
               type="password"
               id="password"
-              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 bg-gray-800 text-white placeholder-gray-500"
+              className="w-full px-4 py-2 border border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-white bg-black text-white placeholder-gray-400"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
               disabled={isLoading}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-blue-700 text-white py-2.5 rounded-md hover:bg-blue-800 transition duration-300 ease-in-out relative font-semibold shadow-md
-                       flex items-center justify-center"
-            disabled={isLoading}
+            className="w-full bg-white text-black py-2 rounded-md hover:bg-gray-200 transition relative"
+            disabled={isLoading} 
           >
             {isLoading ? (
-              <span className="flex items-center">
+              <span className="flex items-center justify-center">
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-black"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -140,15 +139,12 @@ const Signup = () => {
             )}
           </button>
         </form>
-        <p className="mt-6 text-center text-sm text-gray-400">
-          Already have an account?{" "}
-          <a href="/login" className="text-blue-500 hover:text-blue-400 font-medium transition duration-200"> {/* Blue link */}
-            Login here
-          </a>
+        <p className="mt-4 text-center text-sm">
+          Already have an account? <a href="/login" className="text-white font-medium">Login</a>
         </p>
       </div>
 
-      {/* Custom Modal for success/error messages - unchanged as they are already themed well */}
+      {/* Custom Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -158,28 +154,20 @@ const Signup = () => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className={`rounded-lg p-8 w-full max-w-sm shadow-2xl border ${
-                modalType === "success"
-                  ? "bg-green-800 border-green-700 text-white"
-                  : "bg-red-800 border-red-700 text-white"
-              }`}
+              className={`rounded-lg p-8 w-full max-w-sm shadow-2xl border ${modalType === 'success' ? 'bg-green-800 border-green-700 text-white' : 'bg-red-800 border-red-700 text-white'}`}
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
             >
               <h3 className="text-xl font-bold mb-4 text-center">
-                {modalType === "success" ? "Success!" : "Error!"}
+                {modalType === 'success' ? 'Success!' : 'Error!'}
               </h3>
               <p className="text-center mb-6">{modalMessage}</p>
-              {modalType === "error" && (
+              {modalType === 'error' && ( // Only show "OK" button for error messages
                 <div className="flex justify-center">
                   <button
                     onClick={closeModal}
-                    className={`px-6 py-2 rounded-full font-semibold shadow-md transition-colors duration-200 ${
-                      modalType === "success"
-                        ? "bg-green-600 hover:bg-green-700"
-                        : "bg-red-600 hover:bg-red-700"
-                    } text-white`}
+                    className={`px-6 py-2 rounded-full font-semibold shadow-md transition-colors duration-200 ${modalType === 'success' ? 'bg-green-600 hover:bg-green-700' : 'bg-red-600 hover:bg-red-700'} text-white`}
                   >
                     OK
                   </button>
