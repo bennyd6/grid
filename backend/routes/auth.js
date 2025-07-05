@@ -76,7 +76,7 @@ const router = require('express').Router(); // Initialize router here
 router.post('/createuser', [
     body('name', 'Enter a valid name').isLength({ min: 1 }),
     body('email', 'Enter a valid email').isEmail(),
-    body('password', 'Password must contain at least 5 characters').isLength({ min: 5 }),
+    body('password', 'Password must contain at least 5 characters').isLength({ min: 3 }),
 ], async (req, res) => {
     // If there are errors, return bad request and the errors
     const errors = validationResult(req);
