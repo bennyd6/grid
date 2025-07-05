@@ -3,92 +3,73 @@ import { createContext, useContext, useState, useEffect } from "react";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  // Initialize authToken state directly from localStorage on initial render
   const [authToken, setAuthToken] = useState(localStorage.getItem("token"));
   const [user, setUser] = useState(null); // Stores user object (e.g., { uid: '...' })
   const [loading, setLoading] = useState(true); // True initially, becomes false after auth check
 
   useEffect(() => {
-    console.log("AuthContext: useEffect triggered. Current authToken state:", authToken);
+    // ... (console logs)
 
     const verifyAuthToken = async () => {
       if (authToken) {
-        console.log("AuthContext: authToken present. Attempting to fetch user portfolio...");
+        // ... (console logs)
         setLoading(true); // Set loading true when starting verification
         try {
-          // Use environment variable for API_BASE_URL
           const API_BASE_URL = 'https://grid-15d6.onrender.com' || 'http://localhost:3000';
-          console.log(`AuthContext: Fetching from ${API_BASE_URL}/api/auth/myportfolio`);
+          // ... (console logs)
 
           const res = await fetch(`${API_BASE_URL}/api/auth/myportfolio`, {
             headers: { "auth-token": authToken },
           });
 
-          if (res.ok) {
+          if (res.ok) { // Status 200-299
             const portfolioData = await res.json();
-            if (portfolioData && portfolioData.userId) {
-              setUser({ uid: portfolioData.userId });
+            if (portfolioData && portfolioData.userId) { // <-- THIS IS THE CRITICAL LINE
+              setUser({ uid: portfolioData.userId }); // ONLY sets user if userId is present in response
               console.log("AuthContext: User portfolio fetched successfully. User UID:", portfolioData.userId);
             } else {
+              // This block runs if res.ok but portfolioData or portfolioData.userId is missing
               console.warn("AuthContext: Portfolio data fetched but no userId found or invalid structure. Clearing user, keeping token.");
-              // Keep token, but user is not fully set if portfolio data is incomplete
-              setUser(null);
+              setUser(null); // <-- user is set to null here!
             }
-          } else if (res.status === 404) {
+          } else if (res.status === 404) { // <-- THIS IS THE OTHER CRITICAL LINE
             console.log("AuthContext: User is authenticated, but no portfolio found (404). Keeping token, setting user to null.");
-            // This is the key change: Don't clear the token if portfolio is not found.
-            // User is authenticated, just needs to create a portfolio.
-            // setUser(null);
+            // This explicitly states "setting user to null."
+            // setUser(null); // This commented line implies you might have tried to set it to null or had it this way before.
+            // If this line is commented out, then if res.status === 404, user remains whatever it was before, or null if initialized as such.
+            // If user was previously null, it stays null.
+            // THIS IS THE ROOT CAUSE: If `myportfolio` returns 404, `user` remains `null`.
           }
-          // else {
-          //   // If fetching portfolio fails for reasons other than 404 (e.g., 401 Unauthorized, 500 Internal Server Error)
-          //   let errorDetails = await res.text(); // Read as text to avoid JSON parsing errors for non-JSON responses
-          //   console.error(`AuthContext: Failed to fetch user portfolio. Status: ${res.status}. Response: ${errorDetails}`);
-          //   console.warn("AuthContext: Invalid token or severe backend issue. Clearing token.");
-          //   localStorage.removeItem("token"); // Clear invalid/expired token
-          //   setAuthToken(null); // This will re-trigger useEffect with null authToken
-          //   setUser(null);
-          // }
+          // The commented-out else block for other errors also sets user to null and clears token.
+          // ...
         } catch (error) {
-          console.error("AuthContext: Error during user portfolio fetch:", error);
-          console.warn("AuthContext: Network error or unexpected response. Clearing token.");
-          localStorage.removeItem("token"); // Clear token on network error or parsing error
-          setAuthToken(null); // This will re-trigger useEffect with null authToken
-          setUser(null);
+          // ... (error handling, sets user to null)
         } finally {
-          setLoading(false); // Always set loading to false after the fetch attempt
-          console.log("AuthContext: verifyAuthToken finished. Loading set to false.");
+          setLoading(false); // Always set loading to false
         }
       } else {
-        console.log("AuthContext: No authToken present in state. Ensuring user is null.");
-        setUser(null); // Ensure user is null if no token
-        setLoading(false); // No token, so loading is complete
-        console.log("AuthContext: Loading set to false (no token).");
+        // No authToken present
+        setUser(null);
+        setLoading(false);
       }
     };
 
     verifyAuthToken();
-  }, [authToken]); // Dependency array: re-run whenever authToken state changes
+  }, [authToken]);
 
   const login = (token) => {
-    console.log("AuthContext: login function called with token. Setting to localStorage and state.");
-    localStorage.setItem("token", token);
-    setAuthToken(token); // Update authToken state, which triggers the useEffect above
+    // ... (sets authToken, which triggers useEffect)
   };
 
   const logout = () => {
-    console.log("AuthContext: logout function called. Clearing token and user.");
-    localStorage.removeItem("token");
-    setAuthToken(null); // Update authToken state, which triggers the useEffect above
-    setUser(null);
+    // ... (clears token, sets authToken to null, sets user to null)
   };
 
   return (
-    <AuthContext.Provider value={{ authToken, user, login, logout, isAuthenticated: !!authToken, loading }}> {/* Changed isAuthenticated to !!authToken */}
+    <AuthContext.Provider value={{ authToken, user, login, logout, isAuthenticated: !!authToken, loading }}>
       {/* Children are rendered only when auth loading is complete */}
-      {!loading && children}
+      {!loading && children} 
       {loading && (
-        // Optional: Add a loading spinner or message while authentication is being checked
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-90 text-white text-xl z-50">
           Verifying session...
         </div>
