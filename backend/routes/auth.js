@@ -253,4 +253,14 @@ router.get('/portfolio/:userId', async (req, res) => {
 });
 
 
+router.get('/cron/ping', async (req, res) => {
+    console.log("Cron ping received at", new Date().toISOString());
+
+    // Optional: do some periodic task
+    // await performScheduledTasks();
+
+    res.status(200).send('Cron job ping received');
+});
+
+
 module.exports = router;
